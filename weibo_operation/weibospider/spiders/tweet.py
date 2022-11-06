@@ -8,7 +8,7 @@ Created Time: 2020/4/14
 import json
 from scrapy import Spider
 from scrapy.http import Request
-from spiders.common import parse_tweet_info
+from .common import parse_tweet_info
 
 
 class TweetSpider(Spider):

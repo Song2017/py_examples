@@ -7,7 +7,7 @@ Created Time: 2022/10/22
 import json
 import re
 from scrapy import Spider, Request
-from spiders.common import parse_tweet_info
+from .common import parse_tweet_info
 
 
 class SearchSpider(Spider):

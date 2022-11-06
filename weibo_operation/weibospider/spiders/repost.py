@@ -8,7 +8,7 @@ Created Time: 2020/4/14
 import json
 from scrapy import Spider
 from scrapy.http import Request
-from spiders.common import parse_tweet_info, url_to_mid
+from .common import parse_tweet_info, url_to_mid
 
 
 class RepostSpider(Spider):
@@ -25,7 +25,9 @@ class RepostSpider(Spider):
         tweet_ids = ['Mb15BDYR0']
         for tweet_id in tweet_ids:
             mid = url_to_mid(tweet_id)
-            url = f"https://weibo.com/ajax/statuses/repostTimeline?id={mid}&page=1&moduleID=feed&count=10"
+            import pdb
+            pdb.set_trace()
+            url = f"https://weibo.com/ajax/statuses/repostTimeline?id={mid}&page=1&moduleID=feed&count=3"
             yield Request(url, callback=self.parse, meta={'page_num': 1, 'mid': mid})
 
     def parse(self, response, **kwargs):
