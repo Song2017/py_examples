@@ -1,8 +1,7 @@
 """
 !! yield 都是一种流程控制工具，使用它可以实现协作式多任务:
     协程可以把控制器让步给中心调度程序，从而激活其他的协程
-    
-    
+
 - yield item 这行代码会产出一 个值，提供给 next(...) 的调用方;
     此外，还会作出让步，暂停执行 生成器，让调用方继续工作，直到需要使用另一个值时再调用 next()
 - 协程可能会从调用方 接收数据，不过调用方把数据提供给协程使用的是 .send(datum) 方 法，而不是 next(...) 函数。
@@ -13,9 +12,10 @@ yield 关键字可以在表达式 中使用，而且生成器 API 中增加了 .
 除了 .send(...) 方法，PEP 342 还添加了 .throw(...) 和 .close() 方法:前者的作用是让调用方抛出异常，在生成器中处理;后者的作用 是终止生成器
 协程是指一个过程，这个过程与调用方协作，产出由调用方提供的值
 2. 用作协程的生成器的基本行为
-b = yield a: 执行协程到 yield 表达式，然后产出 a 的值，并且暂停，等待为 b 赋
+b = yield a: 执行协程到 yield 表达式，然后产出 a 的值，并且暂停，等待为 b 赋值
 """  # noqa:E501
 import inspect
+from functools import wraps
 
 
 def simple_coroutine():
@@ -50,12 +50,14 @@ try:
 except StopIteration as e:
     print(str(e), inspect.getgeneratorstate(my_co))
 
+_counter = 10
+
 
 def average():
     total = 0
     count = 0
     _avg = None
-    while count < 10:
+    while count < _counter:
         term = yield _avg
         print("term, total", term, total)
         total += term
@@ -66,8 +68,42 @@ def average():
 
 my_average = average()
 next(my_average)
-for i in range(15):
+for i in range(_counter):
     try:
-        print(my_average.send(i), inspect.getgeneratorstate(my_average))
+        print("avg", my_average.send(i), inspect.getgeneratorstate(my_average))
     except Exception as e:
         print("Exception", str(e), inspect.getgeneratorstate(my_average))
+
+
+# 预先激活协程
+def coroutine(func):
+
+    @wraps(func)
+    def primer(*args, **kwargs):
+        _gen = func(*args, **kwargs)
+        next(_gen)
+        return _gen
+
+    return primer
+
+
+@coroutine
+def average2():
+    total = 0
+    count = 0
+    _avg = None
+    while count < _counter:
+        term = yield _avg
+        print("term, total", term, total)
+        total += term
+        count += 1
+        _avg = total // count
+    return _avg
+
+
+my_average = average2()
+for i in range(_counter):
+    try:
+        print("avg", my_average.send(i), inspect.getgeneratorstate(my_average))
+    except Exception as e:
+        print("final avg", e.value, inspect.getgeneratorstate(my_average))

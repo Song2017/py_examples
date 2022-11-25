@@ -5,6 +5,7 @@
 # mac
 .idea/
 .DS_Store
+*.gif
 
 # User-specific files
 *.rsuser
